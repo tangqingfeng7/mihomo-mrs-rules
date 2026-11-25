@@ -2,7 +2,6 @@
 +.api.iplay.163.com
 +.hz.netease.com
 +.laiqukankan.com
-+.lofter.com
 +.mam.netease.com
 +.music.126.com
 +.music.126.net
