@@ -1,0 +1,47 @@
+name: Sync AI domain rules
+
+on:
+  schedule:
+    - cron: '43 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-ai-domain-rules
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download upstream domain list and compiler
+        run: |
+          curl -fsSL --retry 3 https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/AI.txt -o "$RUNNER_TEMP/AI.txt"
+          curl -fsSL --retry 3 https://github.com/MetaCubeX/mihomo/releases/download/v1.19.34/mihomo-linux-amd64-v1-v1.19.34.gz -o "$RUNNER_TEMP/mihomo.gz"
+          gzip -dc "$RUNNER_TEMP/mihomo.gz" > "$RUNNER_TEMP/mihomo"
+          chmod +x "$RUNNER_TEMP/mihomo"
+      - name: Filter shared Google suffixes and compile
+        run: |
+          awk '
+            BEGIN {
+              print "# Source: https://github.com/666OS/rules (YYDS666)"
+              print "# License: GPL-3.0; see licenses/AdBlockDomains-GPL-3.0.txt"
+              print "# Local changes: omit shared googleapis.com and googleusercontent.com suffixes."
+            }
+            { sub(/\r$/, "") }
+            /^#/ || /^$/ || $0 == "+.googleapis.com" || $0 == "+.googleusercontent.com" { next }
+            { print; count++ }
+            END { if (!count) exit 1 }
+          ' "$RUNNER_TEMP/AI.txt" > mrs/AI_Filtered.mrs.txt
+          "$RUNNER_TEMP/mihomo" convert-ruleset domain text mrs/AI_Filtered.mrs.txt mrs/AI_Filtered.mrs
+      - name: Publish updated rules
+        run: |
+          git add -- mrs/AI_Filtered.mrs mrs/AI_Filtered.mrs.txt
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Update filtered AI domain rules"
+          git pull --rebase origin main
+          git push origin HEAD:main
