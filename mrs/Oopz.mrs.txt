@@ -1,0 +1,8 @@
++.agora.io
++.oopz.cn
++.oopz.com
++.oopzapp.com
++.xianniu.com
+lp.open.weixin.qq.com
+open.weixin.qq.com
+support.weixin.qq.com
