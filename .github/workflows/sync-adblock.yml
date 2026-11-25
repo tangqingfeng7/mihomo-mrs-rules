@@ -1,0 +1,33 @@
+name: Sync AdBlockDomains
+on:
+  schedule:
+    - cron: '27 3,11,19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-adblock-domains
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Mihomo rules from 217heidai/adblockfilters
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          revision=$(gh api repos/217heidai/adblockfilters/branches/dist --jq .commit.sha)
+          base="https://raw.githubusercontent.com/217heidai/adblockfilters/$revision"
+          curl --fail --silent --show-error --location --retry 3 "$base/adblockmihomo.mrs" -o mrs/AdBlockDomains.mrs
+          curl --fail --silent --show-error --location --retry 3 "$base/adblockmihomo.yaml" -o mrs/AdBlockDomains.yaml
+      - name: Publish updated rules
+        run: |
+          git add -- mrs/AdBlockDomains.mrs mrs/AdBlockDomains.yaml
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Update AdBlockDomains"
+          git push
