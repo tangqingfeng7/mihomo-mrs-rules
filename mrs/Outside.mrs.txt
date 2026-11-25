@@ -1,0 +1,14 @@
++.423down.com
++.apple-relay.apple.com
++.apple-relay.cloudflare.com
++.binance.com
++.bnbstatic.com
++.emby.vault647.com
++.googleapis.cn
++.gstatic.com
++.gw.sky-ip.net
++.javdb.com
++.livednow.com
++.nodeseek.com
++.xn--ngstr-lra8j.com
++.bangumi.moe
