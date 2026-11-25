@@ -1,0 +1,3 @@
+*.mrs binary
+*.mrs.txt text eol=lf
+*.py text eol=lf
